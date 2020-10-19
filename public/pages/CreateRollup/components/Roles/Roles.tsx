@@ -35,6 +35,10 @@ interface RolesState {
 export default class Roles extends Component<RolesProps, RolesState> {
   constructor(props: RolesProps) {
     super(props);
+    this.state = {
+      isLoading: true,
+      roleOptions: [],
+    };
   }
 
   async componentDidMount(): Promise<void> {

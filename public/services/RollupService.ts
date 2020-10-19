@@ -107,7 +107,7 @@ export default class RollupService {
 
   getAuthInfo = async (): Promise<ServerResponse<AuthInfoResponse>> => {
     const url = `..${NODE_API._SECURITY}`;
-    const response = (await this.httpClient.get(url, {})) as IHttpResponse<ServerResponse<AuthInfoResponse>>;
+    const response = (await this.httpClient.get(url)) as IHttpResponse<ServerResponse<AuthInfoResponse>>;
     return response.data;
   };
 }
