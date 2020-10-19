@@ -27,7 +27,7 @@ export const API: IndexManagementApi = {
   REMOVE_POLICY_BASE: `${API_ROUTE_PREFIX}/remove`,
   CHANGE_POLICY_BASE: `${API_ROUTE_PREFIX}/change_policy`,
   ROLLUP_JOBS_BASE: `${API_ROUTE_PREFIX_ROLLUP}/jobs`,
-  SECURITY_BASE: `${API_ROUTE_PREFIX_SECURITY}/auth-info`,
+  SECURITY_BASE: `${API_ROUTE_PREFIX_SECURITY}/authinfo`,
 };
 
 export const DEFAULT_HEADERS: DefaultHeaders = {
