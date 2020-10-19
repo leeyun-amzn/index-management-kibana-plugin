@@ -257,15 +257,17 @@ export default class Rollups extends Component<RollupsProps, RollupsState> {
   async componentDidMount() {
     chrome.breadcrumbs.set([BREADCRUMBS.INDEX_MANAGEMENT, BREADCRUMBS.ROLLUPS]);
     await this.getRollups();
-    await this.getExplains();
+    const { rollups } = this.state;
+    if (rollups.length != 0) await this.getExplains();
   }
 
   async componentDidUpdate(prevProps: RollupsProps, prevState: RollupsState) {
+    const { rollups } = this.state;
     const prevQuery = Rollups.getQueryObjectFromState(prevState);
     const currQuery = Rollups.getQueryObjectFromState(this.state);
     if (!_.isEqual(prevQuery, currQuery)) {
       await this.getRollups();
-      await this.getExplains();
+      if (rollups.length != 0) await this.getExplains();
     }
   }
 
