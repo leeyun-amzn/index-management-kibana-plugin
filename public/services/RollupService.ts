@@ -16,11 +16,18 @@
 //TODO: Create actual rollup service here when backend is done.
 
 import { IHttpResponse, IHttpService } from "angular";
-import { GetIndicesResponse, PutRollupResponse, GetRollupsResponse, GetFieldsResponse } from "../../server/models/interfaces";
+import {
+  GetIndicesResponse,
+  PutRollupResponse,
+  GetRollupsResponse,
+  GetFieldsResponse,
+  AuthInfoResponse,
+} from "../../server/models/interfaces";
 import { ServerResponse } from "../../server/models/types";
 import { NODE_API } from "../../utils/constants";
 import queryString from "query-string";
 import { DocumentRollup, Rollup } from "../../models/interfaces";
+import index from "../../../../src/legacy/core_plugins/console_legacy";
 
 export default class RollupService {
   httpClient: IHttpService;
@@ -95,6 +102,12 @@ export default class RollupService {
   explainRollup = async (rollupId: string): Promise<ServerResponse<any>> => {
     const url = `..${NODE_API.ROLLUPS}/${rollupId}/_explain`;
     const response = (await this.httpClient.get(url)) as IHttpResponse<ServerResponse<DocumentRollup>>;
+    return response.data;
+  };
+
+  getAuthInfo = async (): Promise<ServerResponse<AuthInfoResponse>> => {
+    const url = `..${NODE_API._SECURITY}`;
+    const response = (await this.httpClient.get(url, {})) as IHttpResponse<ServerResponse<AuthInfoResponse>>;
     return response.data;
   };
 }

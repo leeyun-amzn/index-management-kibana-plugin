@@ -71,6 +71,11 @@ export interface GetFieldsResponse {
   result: string;
 }
 
+//TODO: Might need to fix the structure of this
+export interface AuthInfoResponse {
+  roles: string[];
+}
+
 export interface GetRollupsResponse {
   rollups: RollupItem[];
   totalRollups: number;
@@ -198,6 +203,7 @@ export interface IndexManagementApi {
   readonly REMOVE_POLICY_BASE: string;
   readonly CHANGE_POLICY_BASE: string;
   readonly ROLLUP_JOBS_BASE: string;
+  readonly SECURITY_BASE: string;
 }
 
 export interface DefaultHeaders {

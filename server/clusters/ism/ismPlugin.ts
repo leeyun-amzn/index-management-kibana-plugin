@@ -250,5 +250,11 @@ export default function ismPlugin(Client: any, config: any, components: any) {
     method: "GET",
   });
 
-  // TODO add new APIs as they are being implemented: status, stop, start
+  ism.getAuthInfo = ca({
+    url: {
+      fmt: `${API.SECURITY_BASE}/`,
+      req: {},
+    },
+    method: "GET",
+  });
 }

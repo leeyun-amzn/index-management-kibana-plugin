@@ -108,7 +108,7 @@ export default class CreateRollup extends Component<CreateRollupProps> {
             <EuiSpacer />
             <RollupIndices {...this.props} />
             <EuiSpacer />
-            <Roles rollupId={rollupId} rollupIdError={rollupIdError} onChange={onChangeRoles} roles={roles} roleOptions={options} />
+            <Roles {...this.props} rollupId={rollupId} rollupIdError={rollupIdError} onChange={onChangeRoles} roles={roles} />
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer />

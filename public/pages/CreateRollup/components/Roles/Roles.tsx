@@ -16,21 +16,53 @@
 import React, { Component } from "react";
 import { EuiSpacer, EuiFormRow, EuiComboBox, EuiComboBoxOptionOption } from "@elastic/eui";
 import { ContentPanel } from "../../../../components/ContentPanel";
+import { RollupService } from "../../../../services";
+import { toastNotifications } from "ui/notify";
 
 interface RolesProps {
+  rollupService: RollupService;
   rollupId: string;
   rollupIdError: string;
   onChange: (selectedOptions: EuiComboBoxOptionOption<String>[]) => void;
   roles: EuiComboBoxOptionOption<String>[];
+}
+
+interface RolesState {
+  isLoading: boolean;
   roleOptions: EuiComboBoxOptionOption<String>[];
 }
 
-export default class Roles extends Component<RolesProps> {
+export default class Roles extends Component<RolesProps, RolesState> {
   constructor(props: RolesProps) {
     super(props);
   }
 
+  async componentDidMount(): Promise<void> {
+    await this.getRoles();
+  }
+
+  //TODO: Need to check if this is working properly to get roles
+  getRoles = async (): Promise<void> => {
+    const { rollupService } = this.props;
+    this.setState({ isLoading: true, roleOptions: [] });
+    try {
+      const rolesResponse = await rollupService.getAuthInfo();
+      if (rolesResponse.ok) {
+        const roles = rolesResponse.response.roles.map((role: string) => ({
+          label: role,
+        }));
+        this.setState({ roleOptions: roles });
+      } else {
+        toastNotifications.addDanger(rolesResponse.error);
+      }
+    } catch (err) {
+      toastNotifications.addDanger(err.message);
+    }
+    this.setState({ isLoading: false });
+  };
+
   render() {
+    const { roleOptions } = this.state;
     return (
       <ContentPanel bodyStyles={{ padding: "initial" }} title="Roles" titleSize="m">
         <div style={{ paddingLeft: "10px" }}>
@@ -38,7 +70,7 @@ export default class Roles extends Component<RolesProps> {
           <EuiFormRow label="Roles" helpText="These roles have access to this rollup job.">
             <EuiComboBox
               placeholder="Select for roles"
-              options={this.props.roleOptions}
+              options={roleOptions}
               selectedOptions={this.props.roles}
               onChange={this.props.onChange}
               isClearable={true}

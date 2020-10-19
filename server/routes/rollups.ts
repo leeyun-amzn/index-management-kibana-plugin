@@ -69,4 +69,10 @@ export default function (server: Server, services: NodeServices) {
     method: REQUEST.GET,
     handler: rollupService.explainRollup,
   });
+
+  server.route({
+    path: NODE_API._SECURITY,
+    method: REQUEST.GET,
+    handler: rollupService.getAuthInfo,
+  });
 }

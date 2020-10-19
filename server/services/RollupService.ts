@@ -17,6 +17,7 @@ import _ from "lodash";
 import { Legacy } from "kibana";
 import { CLUSTER, INDEX } from "../utils/constants";
 import {
+  AuthInfoResponse,
   DeleteRollupParams,
   DeleteRollupResponse,
   GetFieldsResponse,
@@ -222,6 +223,18 @@ export default class RollupService {
         return { ok: true, response: { rollups: [], totalRollups: 0 } };
       }
       console.error("Index Management - RollupService - getRollups", err);
+      return { ok: false, error: err.message };
+    }
+  };
+
+  getAuthInfo = async (req: Request, h: ResponseToolkit): Promise<ServerResponse<AuthInfoResponse>> => {
+    try {
+      const { index } = req.params;
+      const { callWithRequest } = this.esDriver.getCluster(CLUSTER.ISM);
+      const response = await callWithRequest(req, "ism.getAuthInfo", { index });
+      return { ok: true, response: response };
+    } catch (err) {
+      console.error("Index Management - RollupService - getAuthInfo:", err);
       return { ok: false, error: err.message };
     }
   };
