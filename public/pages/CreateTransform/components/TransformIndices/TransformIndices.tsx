@@ -14,13 +14,24 @@
  */
 
 import React, { Component, Fragment } from "react";
-import { EuiSpacer, EuiFormRow, EuiComboBox, EuiCallOut } from "@elastic/eui";
+import {
+  EuiSpacer,
+  EuiFormRow,
+  EuiComboBox,
+  EuiCallOut,
+  EuiFlexItem,
+  EuiText,
+  EuiFlexGroup,
+  EuiHorizontalRule,
+  EuiButtonEmpty,
+} from "@elastic/eui";
 import { ContentPanel } from "../../../../components/ContentPanel";
 import { EuiComboBoxOptionOption } from "@elastic/eui/src/components/combo_box/types";
 import { IndexItem } from "../../../../../models/interfaces";
 import IndexService from "../../../../services/IndexService";
 import _ from "lodash";
 import { CoreServicesContext } from "../../../../components/core_services";
+import { FormattedMessage } from "@kbn/i18n/target/types/react";
 
 interface TransformIndicesProps {
   indexService: IndexService;
@@ -37,6 +48,7 @@ interface TransformIndicesState {
   isLoading: boolean;
   indexOptions: { label: string; value?: IndexItem }[];
   targetIndexOptions: { label: string; value?: IndexItem }[];
+  isAddFilterPopoverOpen: boolean;
 }
 
 export default class TransformIndices extends Component<TransformIndicesProps, TransformIndicesState> {
@@ -47,6 +59,7 @@ export default class TransformIndices extends Component<TransformIndicesProps, T
       isLoading: true,
       indexOptions: [],
       targetIndexOptions: [],
+      isAddFilterPopoverOpen: false,
     };
 
     this.onIndexSearchChange = _.debounce(this.onIndexSearchChange, 500, { leading: true });
@@ -103,6 +116,10 @@ export default class TransformIndices extends Component<TransformIndicesProps, T
     onChangeTargetIndex([newOption]);
   };
 
+  setIsAddFilterPopoverOpen = (isAddFilterPopoverOpen: boolean): void => {
+    this.setState({ isAddFilterPopoverOpen });
+  };
+
   render() {
     const {
       sourceIndex,
@@ -134,7 +151,7 @@ export default class TransformIndices extends Component<TransformIndicesProps, T
             label="Source index"
             error={sourceIndexError}
             isInvalid={sourceIndexError != ""}
-            helpText="The index pattern on which to perform the transform job. You can use * as a wildcard."
+            helpText="The index where this transform job is performed on. Type in * as wildcard for index pattern. Indices cannot be changed once the job is created. Please ensure that you select the right source index."
           >
             <EuiComboBox
               placeholder="Select source index"
@@ -149,11 +166,42 @@ export default class TransformIndices extends Component<TransformIndicesProps, T
             />
           </EuiFormRow>
 
+          <EuiSpacer />
+
+          <EuiFlexGroup gutterSize="xs">
+            <EuiFlexItem grow={false}>
+              <EuiText size="xs">
+                <h4>Source index filter</h4>
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiText size="xs" color="subdued">
+                <i> - optional</i>
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+
+          <EuiText size="xs" color="subdued">
+            Choose a subset of source index to focus on to optimize for performane and computing resource. You can’t change filter once the
+            job is created.
+          </EuiText>
+          <EuiButtonEmpty
+            size="xs"
+            onClick={() => this.setIsAddFilterPopoverOpen(true)}
+            data-test-subj="addFilter"
+            className="globalFilterBar__addButton"
+          >
+            + Add filter
+          </EuiButtonEmpty>
+
+          <EuiSpacer />
+          <EuiHorizontalRule margin="xs" />
+          <EuiSpacer />
           <EuiFormRow
             label="Target index"
             error={targetIndexError}
             isInvalid={targetIndexError != ""}
-            helpText="The index stores transform results. You can look up an existing index to reuse or type to create a new index."
+            helpText="Create an index to store transform result. Indices cannot be changed once the job is created. Please ensure that you spell the target index correctly."
           >
             <EuiComboBox
               placeholder="Select or create target index"
