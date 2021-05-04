@@ -14,9 +14,10 @@
  */
 
 import React, { ChangeEvent, useState } from "react";
-import { EuiForm, EuiFlexItem, EuiFormRow, EuiSelect, EuiFlexGroup } from "@elastic/eui";
+import { EuiForm, EuiFlexItem, EuiFormRow, EuiSelect, EuiFlexGroup, EuiPopoverTitle, EuiButtonEmpty } from "@elastic/eui";
 import { FieldItem } from "../../../../../models/interfaces";
 import { getOperators } from "../../../CreateRollup/utils/helpers";
+import { FormattedMessage } from "@kbn/i18n/target/types/react";
 
 interface IndexFilterPopoverProps {
   fields: FieldItem[];
@@ -36,37 +37,67 @@ export default function IndexFilterPopover({ fields }: IndexFilterPopoverProps) 
   };
 
   return (
-    <EuiForm>
-      <EuiFlexGroup />
-      <EuiFlexItem grow={false}>
-        <EuiFormRow label="Field">
-          <EuiSelect
-            id="selectField"
-            placeholder="Select Field"
-            options={fields.map((item) => {
-              return {
-                value: item.label,
-                text: item.label,
-              };
-            })} // Needs options from source index
-            value={selectedField}
-            onChange={onChangeSelectedField}
-          />
-        </EuiFormRow>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiFormRow label="Operator">
-          <EuiSelect
-            id="selectOperator"
-            placeholder="Select Field"
-            options={getOperators(selectedField?.type)} // Needs options from source index
-            value={selectedOperator}
-            onChange={onChangeSelectedOperator}
-          />
-        </EuiFormRow>
-      </EuiFlexItem>
-      <EuiFlexGroup />
-      <EuiFlexItem>Value</EuiFlexItem>
-    </EuiForm>
+    <div>
+      <EuiPopoverTitle>
+        {/*<EuiFlexGroup alignItems='baseline' responsive={false}>*/}
+        {/*<EuiFlexItem>*/}
+        Add data filter
+        {/*</EuiFlexItem>*/}
+        {/*<EuiFlexItem grow={false} />*/}
+        {/*<EuiFlexItem grow={false}>*/}
+        {/*TODO:Add custom expression editor*/}
+        {/*<EuiButtonEmpty*/}
+        {/*  size="xs"*/}
+        {/*  data-test-subj="customExpressionDSL"*/}
+        {/*  onClick={this.toggleCustomEditor}*/}
+        {/*>*/}
+        {/*  {this.state.isCustomEditorOpen ? (*/}
+        {/*    <FormattedMessage*/}
+        {/*      id="data.filter.filterEditor.editFilterValuesButtonLabel"*/}
+        {/*      defaultMessage="Edit filter values"*/}
+        {/*    />*/}
+        {/*  ) : (*/}
+        {/*    <FormattedMessage*/}
+        {/*      id="data.filter.filterEditor.editQueryDslButtonLabel"*/}
+        {/*      defaultMessage="Edit as Query DSL"*/}
+        {/*    />*/}
+        {/*  )}*/}
+        {/*</EuiButtonEmpty>*/}
+        {/*</EuiFlexItem>*/}
+        {/*</EuiFlexGroup>*/}
+      </EuiPopoverTitle>
+      <EuiForm>
+        <EuiFlexGroup />
+        <EuiFlexItem grow={false}>
+          <EuiFormRow label="Field">
+            <EuiSelect
+              id="selectField"
+              placeholder="Select Field"
+              options={fields.map((item) => {
+                return {
+                  value: item.label,
+                  text: item.label,
+                };
+              })} // Needs options from source index
+              value={selectedField}
+              onChange={onChangeSelectedField}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiFormRow label="Operator">
+            <EuiSelect
+              id="selectOperator"
+              placeholder="Select Field"
+              options={getOperators(selectedField?.type)} // Needs options from source index
+              value={selectedOperator}
+              onChange={onChangeSelectedOperator}
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexGroup />
+        <EuiFlexItem>Value</EuiFlexItem>
+      </EuiForm>
+    </div>
   );
 }
