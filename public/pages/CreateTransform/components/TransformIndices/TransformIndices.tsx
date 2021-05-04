@@ -14,24 +14,14 @@
  */
 
 import React, { Component, Fragment } from "react";
-import {
-  EuiSpacer,
-  EuiFormRow,
-  EuiComboBox,
-  EuiCallOut,
-  EuiFlexItem,
-  EuiText,
-  EuiFlexGroup,
-  EuiHorizontalRule,
-  EuiButtonEmpty,
-} from "@elastic/eui";
+import { EuiSpacer, EuiFormRow, EuiComboBox, EuiCallOut, EuiFacetButton, EuiAvatar, EuiPopover } from "@elastic/eui";
 import { ContentPanel } from "../../../../components/ContentPanel";
+import IndexFilterPopover from "../IndexFilterPopover";
 import { EuiComboBoxOptionOption } from "@elastic/eui/src/components/combo_box/types";
 import { IndexItem } from "../../../../../models/interfaces";
 import IndexService from "../../../../services/IndexService";
 import _ from "lodash";
 import { CoreServicesContext } from "../../../../components/core_services";
-import { FormattedMessage } from "@kbn/i18n/target/types/react";
 
 interface TransformIndicesProps {
   indexService: IndexService;
@@ -48,7 +38,8 @@ interface TransformIndicesState {
   isLoading: boolean;
   indexOptions: { label: string; value?: IndexItem }[];
   targetIndexOptions: { label: string; value?: IndexItem }[];
-  isAddFilterPopoverOpen: boolean;
+  isPopoverOpen: boolean;
+  selectFieldValue: string;
 }
 
 export default class TransformIndices extends Component<TransformIndicesProps, TransformIndicesState> {
@@ -59,7 +50,8 @@ export default class TransformIndices extends Component<TransformIndicesProps, T
       isLoading: true,
       indexOptions: [],
       targetIndexOptions: [],
-      isAddFilterPopoverOpen: false,
+      isPopoverOpen: false,
+      selectFieldValue: "",
     };
 
     this.onIndexSearchChange = _.debounce(this.onIndexSearchChange, 500, { leading: true });
@@ -116,9 +108,16 @@ export default class TransformIndices extends Component<TransformIndicesProps, T
     onChangeTargetIndex([newOption]);
   };
 
-  setIsAddFilterPopoverOpen = (isAddFilterPopoverOpen: boolean): void => {
-    this.setState({ isAddFilterPopoverOpen });
+  onButtonClick = () => {
+    const { isPopoverOpen } = this.state;
+    if (isPopoverOpen) {
+      this.setState({ isPopoverOpen: false });
+    } else {
+      this.setState({ isPopoverOpen: true });
+    }
   };
+
+  closePopover = () => this.setState({ isPopoverOpen: false });
 
   render() {
     const {
@@ -130,7 +129,18 @@ export default class TransformIndices extends Component<TransformIndicesProps, T
       onChangeTargetIndex,
       hasAggregation,
     } = this.props;
-    const { isLoading, indexOptions, targetIndexOptions } = this.state;
+
+    const { isLoading, indexOptions, targetIndexOptions, isPopoverOpen } = this.state;
+
+    const filterButton = (
+      <EuiFacetButton
+        icon={<EuiAvatar size="s" name="Place Holder" />} // Should be filter icon per design doc
+        onClick={this.onButtonClick}
+      >
+        + Add data filter
+      </EuiFacetButton>
+    );
+
     return (
       <ContentPanel bodyStyles={{ padding: "initial" }} title="Indices" titleSize="m">
         <div style={{ paddingLeft: "10px" }}>
@@ -151,7 +161,8 @@ export default class TransformIndices extends Component<TransformIndicesProps, T
             label="Source index"
             error={sourceIndexError}
             isInvalid={sourceIndexError != ""}
-            helpText="The index where this transform job is performed on. Type in * as wildcard for index pattern. Indices cannot be changed once the job is created. Please ensure that you select the right source index."
+            helpText="The index where this transform job is performed on. Type in * as wildcard for index pattern. \
+            Indices cannot be changed once the job is created. Please ensure that you select the right source index."
           >
             <EuiComboBox
               placeholder="Select source index"
@@ -165,43 +176,23 @@ export default class TransformIndices extends Component<TransformIndicesProps, T
               data-test-subj="sourceIndexCombobox"
             />
           </EuiFormRow>
-
-          <EuiSpacer />
-
-          <EuiFlexGroup gutterSize="xs">
-            <EuiFlexItem grow={false}>
-              <EuiText size="xs">
-                <h4>Source index filter</h4>
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiText size="xs" color="subdued">
-                <i> - optional</i>
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-
-          <EuiText size="xs" color="subdued">
-            Choose a subset of source index to focus on to optimize for performane and computing resource. You can’t change filter once the
-            job is created.
-          </EuiText>
-          <EuiButtonEmpty
-            size="xs"
-            onClick={() => this.setIsAddFilterPopoverOpen(true)}
-            data-test-subj="addFilter"
-            className="globalFilterBar__addButton"
+          <EuiSpacer size="m" />
+          <EuiFormRow
+            label="Source index filter"
+            error={sourceIndexError}
+            isInvalid={sourceIndexError != ""}
+            helpText="Choose a subset of source index to focus on to optimize for performance and computing resource. You can't change filter once the job is created"
           >
-            + Add filter
-          </EuiButtonEmpty>
+            <EuiPopover button={filterButton} isOpen={isPopoverOpen} closePopover={this.closePopover}>
+              <IndexFilterPopover {...this.props} />
+            </EuiPopover>
+          </EuiFormRow>
 
-          <EuiSpacer />
-          <EuiHorizontalRule margin="xs" />
-          <EuiSpacer />
           <EuiFormRow
             label="Target index"
             error={targetIndexError}
             isInvalid={targetIndexError != ""}
-            helpText="Create an index to store transform result. Indices cannot be changed once the job is created. Please ensure that you spell the target index correctly."
+            helpText="The index stores transform results. You can look up an existing index to reuse or type to create a new index."
           >
             <EuiComboBox
               placeholder="Select or create target index"
