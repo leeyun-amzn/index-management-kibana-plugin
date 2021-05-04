@@ -13,53 +13,60 @@
  * permissions and limitations under the License.
  */
 
-import React, { Component } from "react";
-import { EuiComboBox, EuiForm, EuiFlexGrid, EuiFlexItem } from "@elastic/eui";
-import { EuiComboBoxOptionOption } from "@elastic/eui/src/components/combo_box/types";
-import _ from "lodash";
-import { CoreServicesContext } from "../../../../components/core_services";
+import React, { ChangeEvent, useState } from "react";
+import { EuiForm, EuiFlexItem, EuiFormRow, EuiSelect, EuiFlexGroup } from "@elastic/eui";
+import { FieldItem } from "../../../../../models/interfaces";
+import { getOperators } from "../../../CreateRollup/utils/helpers";
 
-interface IndexFilterPopoverProps {}
-
-interface IndexFilterPopoverState {
-  fieldSelectedOptions: [];
+interface IndexFilterPopoverProps {
+  fields: FieldItem[];
+  selectedField: string;
+  setSelectedField: () => void;
 }
 
-export default class IndexFilterPopover extends Component<IndexFilterPopoverProps, IndexFilterPopoverState> {
-  static contextType = CoreServicesContext;
+export default function IndexFilterPopover({ fields }: IndexFilterPopoverProps) {
+  const [selectedField, setSelectedField] = useState();
+  const [selectedOperator, setSelectedOperator] = useState("");
 
-  constructor(props: IndexFilterPopoverProps) {
-    super(props);
-    this.state = {
-      fieldSelectedOptions: [],
-    };
-  }
+  const onChangeSelectedField = (e: ChangeEvent<HTMLSelectElement>): void => {
+    setSelectedField(e.target.value);
+  };
+  const onChangeSelectedOperator = (e: ChangeEvent<HTMLSelectElement>): void => {
+    setSelectedOperator(e.target.value);
+  };
 
-  async componentDidMount(): Promise<void> {}
-
-  onFieldChange = (options) => {};
-
-  render() {
-    const { fieldSelectedOptions } = this.state;
-
-    return (
-      <EuiForm>
-        <EuiFlexGrid columns={3}>
-          <EuiFlexItem>
-            Fields
-            <EuiComboBox
-              id="selectField"
-              placeholder="Select Field"
-              options={[]} // Needs options from source index
-              selectedOptions={fieldSelectedOptions}
-              onChange={this.onFieldChange}
-              singleSelection={{ asPlainText: true }}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem>Operator</EuiFlexItem>
-          <EuiFlexItem>Value</EuiFlexItem>
-        </EuiFlexGrid>
-      </EuiForm>
-    );
-  }
+  return (
+    <EuiForm>
+      <EuiFlexGroup />
+      <EuiFlexItem grow={false}>
+        <EuiFormRow label="Field">
+          <EuiSelect
+            id="selectField"
+            placeholder="Select Field"
+            options={fields.map((item) => {
+              return {
+                value: item.label,
+                text: item.label,
+              };
+            })} // Needs options from source index
+            value={selectedField}
+            onChange={onChangeSelectedField}
+          />
+        </EuiFormRow>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiFormRow label="Operator">
+          <EuiSelect
+            id="selectOperator"
+            placeholder="Select Field"
+            options={getOperators(selectedField?.type)} // Needs options from source index
+            value={selectedOperator}
+            onChange={onChangeSelectedOperator}
+          />
+        </EuiFormRow>
+      </EuiFlexItem>
+      <EuiFlexGroup />
+      <EuiFlexItem>Value</EuiFlexItem>
+    </EuiForm>
+  );
 }
