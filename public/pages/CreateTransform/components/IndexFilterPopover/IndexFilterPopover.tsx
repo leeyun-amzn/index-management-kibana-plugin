@@ -14,7 +14,7 @@
  */
 
 import React, { ChangeEvent, useState } from "react";
-import { EuiForm, EuiFlexItem, EuiFormRow, EuiSelect, EuiPopoverTitle, EuiSpacer, EuiFlexGrid } from "@elastic/eui";
+import { EuiForm, EuiFlexItem, EuiFormRow, EuiSelect, EuiPopoverTitle, EuiSpacer, EuiFlexGroup } from "@elastic/eui";
 import { FieldItem } from "../../../../../models/interfaces";
 
 interface IndexFilterPopoverProps {
@@ -68,9 +68,8 @@ export default function IndexFilterPopover({ fields }: IndexFilterPopoverProps) 
         {/*</EuiFlexItem>*/}
         {/*</EuiFlexGroup>*/}
       </EuiPopoverTitle>
-      <EuiSpacer />
       <EuiForm>
-        <EuiFlexGrid direction="row" columns={2}>
+        <EuiFlexGroup>
           <EuiFlexItem grow={false}>
             <EuiFormRow label="Field">
               <EuiSelect
@@ -97,7 +96,7 @@ export default function IndexFilterPopover({ fields }: IndexFilterPopoverProps) 
               />
             </EuiFormRow>
           </EuiFlexItem>
-        </EuiFlexGrid>
+        </EuiFlexGroup>
         <EuiFlexItem>
           <EuiFormRow label="Value">
             <EuiSelect id="selectValue" options={[]} value={selectedValue} onChange={onChangeSelectedValue} />
