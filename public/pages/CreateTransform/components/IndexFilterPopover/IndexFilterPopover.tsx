@@ -14,8 +14,20 @@
  */
 
 import React, { ChangeEvent, useState } from "react";
-import { EuiForm, EuiFlexItem, EuiFormRow, EuiSelect, EuiPopoverTitle, EuiSpacer, EuiFlexGroup, EuiButtonEmpty } from "@elastic/eui";
+import {
+  EuiForm,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiSelect,
+  EuiPopoverTitle,
+  EuiSpacer,
+  EuiFlexGroup,
+  EuiButtonEmpty,
+  EuiCodeEditor,
+  EuiButton,
+} from "@elastic/eui";
 import { FieldItem } from "../../../../../models/interfaces";
+import { i18n } from "@kbn/i18n";
 
 interface IndexFilterPopoverProps {
   fields: FieldItem[];
@@ -28,6 +40,7 @@ export default function IndexFilterPopover({ fields }: IndexFilterPopoverProps) 
   const [selectedOperator, setSelectedOperator] = useState("");
   const [selectedValue, setSelectedValue] = useState("");
   const [isCustomEditorOpen, setIsCustomEditorOpen] = useState(false);
+  const [queryDsl, setQueryDsl] = useState("");
 
   const onChangeSelectedField = (e: ChangeEvent<HTMLSelectElement>): void => {
     setSelectedField(e.target.value);
@@ -38,9 +51,10 @@ export default function IndexFilterPopover({ fields }: IndexFilterPopoverProps) 
   const onChangeSelectedValue = (e: ChangeEvent<HTMLSelectElement>): void => {
     setSelectedValue(e.target.value);
   };
+
   function paramsEditor() {
     return (
-      <EuiForm>
+      <div>
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
             <EuiFormRow label="Field">
@@ -74,7 +88,19 @@ export default function IndexFilterPopover({ fields }: IndexFilterPopoverProps) 
             <EuiSelect id="selectValue" options={[]} value={selectedValue} onChange={onChangeSelectedValue} />
           </EuiFormRow>
         </EuiFlexItem>
-      </EuiForm>
+      </div>
+    );
+  }
+
+  function customEditor() {
+    return (
+      <EuiFormRow
+        label={i18n.translate("data.filter.filterEditor.queryDslLabel", {
+          defaultMessage: "Elasticsearch Query DSL",
+        })}
+      >
+        <EuiCodeEditor value={queryDsl} onChange={() => setQueryDsl(queryDsl)} mode="json" width="100%" height="250px" />
+      </EuiFormRow>
     );
   }
 
@@ -83,16 +109,40 @@ export default function IndexFilterPopover({ fields }: IndexFilterPopoverProps) 
       <EuiPopoverTitle>
         <EuiFlexGroup alignItems="baseline" responsive={false}>
           <EuiFlexItem>Add data filter</EuiFlexItem>
-          <EuiFlexItem grow={false} />
           <EuiFlexItem grow={false}>
             {/*TODO:Add custom expression editor*/}
             <EuiButtonEmpty size="xs" onClick={() => setIsCustomEditorOpen(!isCustomEditorOpen)}>
-              {isCustomEditorOpen ? "Edit filter values" : "Edit as Query DSL"}
+              {isCustomEditorOpen ? "Edit filter values" : "Custom expression"}
             </EuiButtonEmpty>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPopoverTitle>
-      {isCustomEditorOpen ? <div /> : paramsEditor()}
+      <EuiForm>
+        {isCustomEditorOpen ? customEditor() : paramsEditor()}
+        <EuiSpacer />
+        <EuiFlexGroup direction="rowReverse" alignItems="center" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              fill
+              // onClick={this.onSubmit}
+              // isDisabled={!this.isFilterValid()}
+              data-test-subj="saveFilter"
+            >
+              Save
+            </EuiButton>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              flush="right"
+              // onClick={this.props.onCancel}
+              data-test-subj="cancelSaveFilter"
+            >
+              Cancel
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem />
+        </EuiFlexGroup>
+      </EuiForm>
     </div>
   );
 }
