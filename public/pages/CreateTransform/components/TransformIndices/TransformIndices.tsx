@@ -40,11 +40,14 @@ import { CoreServicesContext } from "../../../../components/core_services";
 interface TransformIndicesProps {
   indexService: IndexService;
   sourceIndex: { label: string; value?: IndexItem }[];
-  sourceIndexFilter: {}[];
+  //TODO: Uncomment the following line when multiple data filter is supported
+  // sourceIndexFilter: string[];
+  sourceIndexFilter: string;
   sourceIndexError: string;
   targetIndex: { label: string; value?: IndexItem }[];
   targetIndexError: string;
   onChangeSourceIndex: (options: EuiComboBoxOptionOption<IndexItem>[]) => void;
+  onChangeSourceIndexFilter: (sourceIndexFilter: string) => void;
   onChangeTargetIndex: (options: EuiComboBoxOptionOption<IndexItem>[]) => void;
   hasAggregation: boolean;
   fields: FieldItem[];
@@ -56,7 +59,8 @@ interface TransformIndicesState {
   targetIndexOptions: { label: string; value?: IndexItem }[];
   isPopoverOpen: boolean;
   selectFieldValue: string;
-  dataFilters: string[];
+  // dataFilters: string[];
+  dataFilters: string;
 }
 
 export default class TransformIndices extends Component<TransformIndicesProps, TransformIndicesState> {
@@ -69,7 +73,8 @@ export default class TransformIndices extends Component<TransformIndicesProps, T
       targetIndexOptions: [],
       isPopoverOpen: false,
       selectFieldValue: "",
-      dataFilters: ["ex"],
+      // dataFilters: [],
+      dataFilters: "",
     };
 
     this.onIndexSearchChange = _.debounce(this.onIndexSearchChange, 500, { leading: true });
@@ -135,14 +140,14 @@ export default class TransformIndices extends Component<TransformIndicesProps, T
     }
   };
 
-  onAddDataFilter = (dataFilter: string): void => {
-    const { dataFilters } = this.state;
-    //debug
-    console.log("to add: " + dataFilter + " existing filters: " + dataFilters);
-    dataFilters.push(dataFilter);
-    this.setState({ dataFilters });
-    this.closePopover();
-  };
+  // onAddDataFilter = (dataFilter: string): void => {
+  //   const { dataFilters } = this.state;
+  //   //debug
+  //   console.log("to add: " + dataFilter + " existing filters: " + dataFilters);
+  //   dataFilters.push(dataFilter);
+  //   this.setState({ dataFilters });
+  //   this.closePopover();
+  // };
 
   closePopover = () => this.setState({ isPopoverOpen: false });
 
@@ -150,6 +155,7 @@ export default class TransformIndices extends Component<TransformIndicesProps, T
     const {
       sourceIndex,
       sourceIndexError,
+      sourceIndexFilter,
       targetIndex,
       targetIndexError,
       onChangeSourceIndex,
@@ -219,9 +225,10 @@ export default class TransformIndices extends Component<TransformIndicesProps, T
             job is created.
           </EuiText>
 
-          {this.state.dataFilters.map((item) => (
-            <EuiBadge>{item}</EuiBadge>
-          ))}
+          {/*{this.state.dataFilters.map((item) => (*/}
+          {/*  <EuiBadge>{item}</EuiBadge>*/}
+          {/*))}*/}
+          <EuiBadge>{sourceIndexFilter}</EuiBadge>
           <EuiPopover
             button={
               <EuiButtonEmpty
@@ -236,10 +243,8 @@ export default class TransformIndices extends Component<TransformIndicesProps, T
             isOpen={isPopoverOpen}
             closePopover={this.closePopover}
           >
-            <IndexFilterPopover {...this.props} onCancel={this.closePopover} onAddDataFilter={this.onAddDataFilter} />
+            <IndexFilterPopover {...this.props} closePopover={this.closePopover} />
           </EuiPopover>
-          {/*Add list of filters here*/}
-          {/*{renderFilters()}*/}
           <EuiSpacer />
           <EuiHorizontalRule margin="xs" />
           <EuiFormRow

@@ -62,7 +62,9 @@ interface CreateTransformFormState {
   description: string;
   sourceIndex: { label: string; value?: IndexItem }[];
   sourceIndexError: string;
-  sourceIndexFilter: {}[];
+  //TODO: Uncomment the following line when multiple data filter is supported
+  // sourceIndexFilter: string[];
+  sourceIndexFilter: string;
   targetIndex: { label: string; value?: IndexItem }[];
   targetIndexError: string;
 
@@ -116,7 +118,9 @@ export default class CreateTransformForm extends Component<CreateTransformFormPr
 
       sourceIndex: [],
       sourceIndexError: "",
-      sourceIndexFilter: [],
+      //TODO: Uncomment the following line when multiple data filter is supported
+      // sourceIndexFilter: [],
+      sourceIndexFilter: "",
       targetIndex: [],
       targetIndexError: "",
 
@@ -239,6 +243,11 @@ export default class CreateTransformForm extends Component<CreateTransformFormPr
       selectedAggregations: {},
     });
     await this.getMappings(srcIndexText);
+  };
+
+  //TODO: Change type from string to string[] or something else  when multiple data filter is supported
+  onChangeSourceIndexFilter = (sourceIndexFilter: string): void => {
+    this.setState({ sourceIndexFilter });
   };
 
   onChangeTargetIndex = (options: EuiComboBoxOptionOption<IndexItem>[]): void => {
@@ -407,6 +416,7 @@ export default class CreateTransformForm extends Component<CreateTransformFormPr
           onChangeName={this.onChangeName}
           onChangeDescription={this.onChangeDescription}
           onChangeSourceIndex={this.onChangeSourceIndex}
+          onChangeSourceIndexFilter={this.onChangeSourceIndexFilter}
           onChangeTargetIndex={this.onChangeTargetIndex}
           currentStep={this.state.currentStep}
           hasAggregation={selectedGroupField.length != 0 || selectedAggregations.length != 0}

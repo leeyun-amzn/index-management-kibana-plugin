@@ -27,16 +27,15 @@ import {
   EuiButton,
 } from "@elastic/eui";
 import { FieldItem, IndexItem } from "../../../../../models/interfaces";
-import { i18n } from "@kbn/i18n";
 
 interface IndexFilterPopoverProps {
   sourceIndex: { label: string; value?: IndexItem }[];
   fields: FieldItem[];
-  onAddDataFilter: (dataFilter: string) => void;
-  onCancel: () => void;
+  onChangeSourceIndexFilter: (sourceIndexFilter: string) => void;
+  closePopover: () => void;
 }
 
-export default function IndexFilterPopover({ sourceIndex, fields, onAddDataFilter, onCancel }: IndexFilterPopoverProps) {
+export default function IndexFilterPopover({ sourceIndex, fields, onChangeSourceIndexFilter, closePopover }: IndexFilterPopoverProps) {
   const [selectedField, setSelectedField] = useState("");
   const [selectedOperator, setSelectedOperator] = useState("");
   const [selectedValue, setSelectedValue] = useState("");
@@ -95,11 +94,7 @@ export default function IndexFilterPopover({ sourceIndex, fields, onAddDataFilte
 
   function customEditor() {
     return (
-      <EuiFormRow
-        label={i18n.translate("data.filter.filterEditor.queryDslLabel", {
-          defaultMessage: "Elasticsearch Query DSL",
-        })}
-      >
+      <EuiFormRow label="Elasticsearch Query DSL">
         <EuiCodeEditor value={queryDsl} onChange={(string) => setQueryDsl(string)} mode="json" width="100%" height="250px" />
       </EuiFormRow>
     );
@@ -111,7 +106,6 @@ export default function IndexFilterPopover({ sourceIndex, fields, onAddDataFilte
         <EuiFlexGroup alignItems="baseline" responsive={false}>
           <EuiFlexItem>Add data filter</EuiFlexItem>
           {/*<EuiFlexItem grow={false}>*/}
-          {/*  /!*TODO:Add custom expression editor*!/*/}
           {/*  <EuiButtonEmpty size="xs" onClick={() => setIsCustomEditorOpen(!isCustomEditorOpen)}>*/}
           {/*    {isCustomEditorOpen ? "Edit filter values" : "Custom expression"}*/}
           {/*  </EuiButtonEmpty>*/}
@@ -127,7 +121,10 @@ export default function IndexFilterPopover({ sourceIndex, fields, onAddDataFilte
           <EuiFlexItem grow={false}>
             <EuiButton
               fill
-              onClick={() => onAddDataFilter(queryDsl)}
+              onClick={() => {
+                onChangeSourceIndexFilter(queryDsl);
+                closePopover();
+              }}
               // isDisabled={!this.isFilterValid()}
               data-test-subj="saveFilter"
             >
@@ -135,7 +132,7 @@ export default function IndexFilterPopover({ sourceIndex, fields, onAddDataFilte
             </EuiButton>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty flush="right" onClick={onCancel} data-test-subj="cancelSaveFilter">
+            <EuiButtonEmpty flush="right" onClick={closePopover} data-test-subj="cancelSaveFilter">
               Cancel
             </EuiButtonEmpty>
           </EuiFlexItem>
