@@ -399,6 +399,7 @@ export default class CreateTransformForm extends Component<CreateTransformFormPr
           isSubmitting={isSubmitting}
           hasSubmitted={hasSubmitted}
           description={description}
+          sourceIndexFilter={sourceIndexFilter}
           sourceIndex={sourceIndex}
           sourceIndexError={sourceIndexError}
           targetIndex={targetIndex}
