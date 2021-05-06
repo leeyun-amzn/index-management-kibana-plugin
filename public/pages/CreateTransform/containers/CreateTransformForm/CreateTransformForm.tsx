@@ -247,7 +247,9 @@ export default class CreateTransformForm extends Component<CreateTransformFormPr
 
   //TODO: Change type from string to string[] or something else  when multiple data filter is supported
   onChangeSourceIndexFilter = (sourceIndexFilter: string): void => {
-    this.setState({ sourceIndexFilter });
+    let newJSON = this.state.transformJSON;
+    newJSON.dataSelectionQuery = JSON.parse(sourceIndexFilter);
+    this.setState({ sourceIndexFilter, transformJSON: newJSON });
   };
 
   onChangeTargetIndex = (options: EuiComboBoxOptionOption<IndexItem>[]): void => {
