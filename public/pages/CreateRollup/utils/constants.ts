@@ -111,21 +111,21 @@ export const OPERATORS_MAP = {
 };
 
 export const COMPARISON_OPERATORS = [
-  { text: "is", value: OPERATORS_MAP.IS, dataTypes: ["number", "text", "keyword", "boolean"] },
+  { text: "is", value: OPERATORS_MAP.IS, dataTypes: ["number", "text", "keyword", "boolean", "date"] },
   {
     text: "is not",
     value: OPERATORS_MAP.IS_NOT,
-    dataTypes: ["number", "text", "keyword", "boolean"],
+    dataTypes: ["number", "text", "keyword", "boolean", "date"],
   },
   {
     text: "is null",
     value: OPERATORS_MAP.IS_NULL,
-    dataTypes: ["number", "text", "keyword", "boolean"],
+    dataTypes: ["number", "text", "keyword", "boolean", "date"],
   },
   {
     text: "is not null",
     value: OPERATORS_MAP.IS_NOT_NULL,
-    dataTypes: ["number", "text", "keyword"],
+    dataTypes: ["number", "text", "keyword", "date"],
   },
   { text: "is greater than", value: OPERATORS_MAP.IS_GREATER, dataTypes: ["number"] },
   { text: "is greater than equal", value: OPERATORS_MAP.IS_GREATER_EQUAL, dataTypes: ["number"] },

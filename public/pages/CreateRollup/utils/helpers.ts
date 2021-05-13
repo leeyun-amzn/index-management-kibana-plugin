@@ -62,10 +62,3 @@ export const parseFieldOptions = (prefix: string, mappings: any): FieldItem[] =>
   }
   return fieldsOption;
 };
-
-export const getOperators = (fieldType) =>
-  COMPARISON_OPERATORS.reduce(
-    (acc, currentOperator) =>
-      currentOperator.dataTypes.includes(fieldType) ? [...acc, { text: currentOperator.text, value: currentOperator.value }] : acc,
-    []
-  );

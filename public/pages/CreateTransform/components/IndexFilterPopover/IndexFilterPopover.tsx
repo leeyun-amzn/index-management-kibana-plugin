@@ -27,6 +27,7 @@ import {
   EuiButton,
 } from "@elastic/eui";
 import { FieldItem, IndexItem } from "../../../../../models/interfaces";
+import { getOperators, isNumericMapping } from "../../utils/helpers";
 
 interface IndexFilterPopoverProps {
   sourceIndex: { label: string; value?: IndexItem }[];
@@ -44,6 +45,7 @@ export default function IndexFilterPopover({
   closePopover,
 }: IndexFilterPopoverProps) {
   const [selectedField, setSelectedField] = useState("");
+  const [selectedFieldType, setSelectedFieldType] = useState("number");
   const [selectedOperator, setSelectedOperator] = useState("");
   const [selectedValue, setSelectedValue] = useState("");
   const [isCustomEditorOpen, setIsCustomEditorOpen] = useState(false);
@@ -51,6 +53,10 @@ export default function IndexFilterPopover({
 
   const onChangeSelectedField = (e: ChangeEvent<HTMLSelectElement>): void => {
     setSelectedField(e.target.value);
+    const type = fields.find((acc) => {
+      return acc.label === e.target.value;
+    }).type;
+    isNumericMapping(type) ? setSelectedFieldType("number") : setSelectedFieldType(type);
   };
   const onChangeSelectedOperator = (e: ChangeEvent<HTMLSelectElement>): void => {
     setSelectedOperator(e.target.value);
@@ -82,8 +88,8 @@ export default function IndexFilterPopover({
             <EuiFormRow label="Operator">
               <EuiSelect
                 id="selectOperator"
-                options={[]}
-                // {getOperators(selectedField?.type)}
+                // options={[]}
+                options={getOperators(selectedFieldType)}
                 value={selectedOperator}
                 onChange={onChangeSelectedOperator}
               />
@@ -112,17 +118,17 @@ export default function IndexFilterPopover({
       <EuiPopoverTitle>
         <EuiFlexGroup alignItems="baseline" responsive={false}>
           <EuiFlexItem>Add data filter</EuiFlexItem>
-          {/*<EuiFlexItem grow={false}>*/}
-          {/*  <EuiButtonEmpty size="xs" onClick={() => setIsCustomEditorOpen(!isCustomEditorOpen)}>*/}
-          {/*    {isCustomEditorOpen ? "Edit filter values" : "Custom expression"}*/}
-          {/*  </EuiButtonEmpty>*/}
-          {/*</EuiFlexItem>*/}
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty size="xs" onClick={() => setIsCustomEditorOpen(!isCustomEditorOpen)}>
+              {isCustomEditorOpen ? "Edit filter values" : "Custom expression"}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPopoverTitle>
       <EuiForm>
         {/*TODO: implement paramsEditor and uncomment the line below*/}
-        {/*{isCustomEditorOpen ? customEditor() : paramsEditor()}*/}
-        {customEditor()}
+        {isCustomEditorOpen ? customEditor() : paramsEditor()}
+        {/*{customEditor()}*/}
         <EuiSpacer />
         <EuiFlexGroup direction="rowReverse" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false}>
