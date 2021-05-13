@@ -268,3 +268,10 @@ export interface TransformAggItem {
   percentiles?: { field: string; percents: number[] };
   scripted_metric?: object;
 }
+
+export const DATA_TYPES = {
+  NUMBER: "number",
+  TEXT: "text",
+  BOOLEAN: "boolean",
+  KEYWORD: "keyword",
+};

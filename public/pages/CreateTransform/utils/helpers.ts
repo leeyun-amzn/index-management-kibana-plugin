@@ -13,8 +13,8 @@
  * permissions and limitations under the License.
  */
 
-import { FieldItem } from "../../../../models/interfaces";
-import { COMPARISON_OPERATORS } from "../../CreateRollup/utils/constants";
+import { DATA_TYPES, FieldItem } from "../../../../models/interfaces";
+import { COMPARISON_OPERATORS, OPERATORS_MAP } from "./constants";
 
 export const parseTimeunit = (timeunit: string): string => {
   if (timeunit == "ms" || timeunit == "Milliseconds") return "millisecond(s)";
@@ -69,3 +69,109 @@ export const getOperators = (fieldType: string) =>
       currentOperator.dataTypes.includes(fieldType) ? [...acc, { text: currentOperator.text, value: currentOperator.value }] : acc,
     []
   );
+
+export const isRangeOperator = (selectedOperator) => [OPERATORS_MAP.IN_RANGE, OPERATORS_MAP.NOT_IN_RANGE].includes(selectedOperator);
+
+export const isNullOperator = (selectedOperator) => [OPERATORS_MAP.IS_NULL, OPERATORS_MAP.IS_NOT_NULL].includes(selectedOperator);
+
+export const OPERATORS_QUERY_MAP = {
+  [OPERATORS_MAP.IS]: {
+    query: ({ fieldName: [{ label, type }], fieldValue }) =>
+      type === DATA_TYPES.TEXT ? { match_phrase: { [label]: fieldValue } } : { term: { [label]: fieldValue } },
+  },
+  [OPERATORS_MAP.IS_NOT]: {
+    query: ({ fieldName: [{ label, type }], fieldValue }) =>
+      type === DATA_TYPES.TEXT
+        ? {
+            bool: { must_not: { match_phrase: { [label]: fieldValue } } },
+          }
+        : {
+            bool: { must_not: { term: { [label]: fieldValue } } },
+          },
+  },
+  [OPERATORS_MAP.IS_NULL]: {
+    query: ({ fieldName: [{ label: fieldKey }] }) => ({
+      bool: { must_not: { exists: { field: fieldKey } } },
+    }),
+  },
+  [OPERATORS_MAP.IS_NOT_NULL]: {
+    query: ({ fieldName: [{ label: fieldKey }] }) => ({ exists: { field: fieldKey } }),
+  },
+  [OPERATORS_MAP.IS_GREATER]: {
+    query: ({ fieldName: [{ label: fieldKey }], fieldValue }) => ({
+      range: { [fieldKey]: { gt: fieldValue } },
+    }),
+  },
+
+  [OPERATORS_MAP.IS_GREATER_EQUAL]: {
+    query: ({ fieldName: [{ label: fieldKey }], fieldValue }) => ({
+      range: { [fieldKey]: { gte: fieldValue } },
+    }),
+  },
+  [OPERATORS_MAP.IS_LESS]: {
+    query: ({ fieldName: [{ label: fieldKey }], fieldValue }) => ({
+      range: { [fieldKey]: { lt: fieldValue } },
+    }),
+  },
+
+  [OPERATORS_MAP.IS_LESS_EQUAL]: {
+    query: ({ fieldName: [{ label: fieldKey }], fieldValue }) => ({
+      range: { [fieldKey]: { lte: fieldValue } },
+    }),
+  },
+
+  [OPERATORS_MAP.IN_RANGE]: {
+    query: ({ fieldName: [{ label: fieldKey }], fieldRangeStart, fieldRangeEnd }) => ({
+      range: { [fieldKey]: { gte: fieldRangeStart, lte: fieldRangeEnd } },
+    }),
+  },
+  [OPERATORS_MAP.NOT_IN_RANGE]: {
+    query: ({ fieldName: [{ label: fieldKey }], fieldRangeStart, fieldRangeEnd }) => ({
+      bool: { must_not: { range: { [fieldKey]: { gte: fieldRangeStart, lte: fieldRangeEnd } } } },
+    }),
+  },
+
+  [OPERATORS_MAP.STARTS_WITH]: {
+    query: ({ fieldName: [{ label: fieldKey }], fieldValue }) => ({
+      prefix: { [fieldKey]: fieldValue },
+    }),
+  },
+
+  [OPERATORS_MAP.ENDS_WITH]: {
+    query: ({ fieldName: [{ label: fieldKey }], fieldValue }) => ({
+      wildcard: { [fieldKey]: `*${fieldValue}` },
+    }),
+  },
+  [OPERATORS_MAP.CONTAINS]: {
+    query: ({ fieldName: [{ label, type }], fieldValue }) =>
+      type === DATA_TYPES.TEXT
+        ? {
+            query_string: { query: `*${fieldValue}*`, default_field: label },
+          }
+        : {
+            wildcard: { [label]: `*${fieldValue}*` },
+          },
+  },
+  [OPERATORS_MAP.NOT_CONTAINS]: {
+    query: ({ fieldName: [{ label, type }], fieldValue }) =>
+      type === DATA_TYPES.TEXT
+        ? {
+            bool: {
+              must_not: { query_string: { query: `*${fieldValue}*`, default_field: label } },
+            },
+          }
+        : {
+            bool: { must_not: { wildcard: { [label]: `*${fieldValue}*` } } },
+          },
+  },
+};
+
+export const validateRange = (value, whereFilters) => {
+  if (value === "") return "Required";
+  if (whereFilters.fieldRangeEnd < value) {
+    return "Start should be less than end range";
+  }
+  if (value < whereFilters.fieldRangeStart) {
+    return "End should be greater than start range";
+  }
+};

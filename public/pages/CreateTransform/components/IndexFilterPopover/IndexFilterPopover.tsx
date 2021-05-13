@@ -25,9 +25,13 @@ import {
   EuiButtonEmpty,
   EuiCodeEditor,
   EuiButton,
+  EuiFieldText,
+  EuiText,
+  EuiFieldNumber,
 } from "@elastic/eui";
-import { FieldItem, IndexItem } from "../../../../../models/interfaces";
-import { getOperators, isNumericMapping } from "../../utils/helpers";
+import { DATA_TYPES, FieldItem, IndexItem } from "../../../../../models/interfaces";
+import { getOperators, isNullOperator, isNumericMapping, isRangeOperator, validateRange } from "../../utils/helpers";
+import { WHERE_BOOLEAN_FILTERS } from "../../utils/constants";
 
 interface IndexFilterPopoverProps {
   sourceIndex: { label: string; value?: IndexItem }[];
@@ -48,8 +52,11 @@ export default function IndexFilterPopover({
   const [selectedFieldType, setSelectedFieldType] = useState("number");
   const [selectedOperator, setSelectedOperator] = useState("");
   const [selectedValue, setSelectedValue] = useState("");
+  const [selectedBooleanValue, setSelectedBooleanValue] = useState("true");
   const [isCustomEditorOpen, setIsCustomEditorOpen] = useState(false);
   const [queryDsl, setQueryDsl] = useState(sourceIndexFilter);
+  const [fieldRangeStart, setFieldRangeStart] = useState();
+  const [fieldRangeEnd, setFieldRangeEnd] = useState();
 
   const onChangeSelectedField = (e: ChangeEvent<HTMLSelectElement>): void => {
     setSelectedField(e.target.value);
@@ -58,11 +65,80 @@ export default function IndexFilterPopover({
     }).type;
     isNumericMapping(type) ? setSelectedFieldType("number") : setSelectedFieldType(type);
   };
+
   const onChangeSelectedOperator = (e: ChangeEvent<HTMLSelectElement>): void => {
     setSelectedOperator(e.target.value);
   };
-  const onChangeSelectedValue = (e: ChangeEvent<HTMLSelectElement>): void => {
+
+  const onChangeSelectedValue = (e: ChangeEvent<HTMLInputElement>): void => {
     setSelectedValue(e.target.value);
+  };
+
+  const onChangeSelectedBooleanValue = (e: ChangeEvent<HTMLSelectElement>): void => {
+    setSelectedBooleanValue(e.target.value);
+  };
+
+  const renderBetweenAnd = () => {
+    return (
+      <EuiFlexGroup alignItems="center">
+        <EuiFlexItem>
+          <EuiFieldNumber
+            name="where.fieldRangeStart"
+            // validate={ value => validateRange(value, fieldRangeStart,fieldRangeEnd)}
+            // onChange={ handleChangeWrapper, isInvalid }}
+            value={fieldRangeStart}
+            onChange={(e) => setFieldRangeStart(e.target.valueAsNumber)}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiText textAlign="center">to</EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFieldNumber
+            name="where.fieldRangeEnd"
+            // fieldProps={{
+            //   validate: value => validateRange(value, values.where),
+            // }}
+            // inputProps={{ onChange: this.handleChangeWrapper, isInvalid }}
+            value={fieldRangeEnd}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  };
+
+  const renderValueField = (fieldType: string, fieldOperator: string) => {
+    if (fieldType == DATA_TYPES.NUMBER) {
+      return isRangeOperator(fieldOperator) ? (
+        renderBetweenAnd()
+      ) : (
+        <EuiFieldNumber
+          name="where.fieldValue"
+          value={selectedValue}
+          onChange={onChangeSelectedValue}
+          // fieldProps={{ validate: required }}
+          // inputProps={{ onChange: this.handleChangeWrapper, isInvalid }}
+        />
+      );
+    } else if (fieldType == DATA_TYPES.BOOLEAN) {
+      return (
+        <EuiSelect
+          name="where.fieldValue"
+          value={selectedBooleanValue}
+          onChange={onChangeSelectedBooleanValue}
+          // fieldProps={{ validate: required }}
+          options={WHERE_BOOLEAN_FILTERS}
+        />
+      );
+    } else {
+      return (
+        <EuiFieldText
+          name="where.fieldValue"
+          // fieldProps={{ validate: required }}
+          // inputProps={{ onChange: this.handleChangeWrapper, isInvalid }}
+        />
+      );
+    }
   };
 
   function paramsEditor() {
@@ -96,18 +172,24 @@ export default function IndexFilterPopover({
             </EuiFormRow>
           </EuiFlexItem>
         </EuiFlexGroup>
-        <EuiFlexItem>
+        {!isNullOperator(selectedOperator) && (
           <EuiFormRow label="Value">
-            <EuiSelect id="selectValue" options={[]} value={selectedValue} onChange={onChangeSelectedValue} />
+            <EuiFlexItem>{renderValueField(selectedFieldType, selectedOperator)}</EuiFlexItem>
           </EuiFormRow>
-        </EuiFlexItem>
+        )}
+        {/*<EuiFlexItem>*/}
+        {/*  <EuiFormRow label="Value">*/}
+        {/*    /!*<EuiSelect id="selectValue" options={[]} value={selectedValue} onChange={onChangeSelectedValue} />*!/*/}
+        {/*    <EuiFieldText value={selectedValue} onChange={onChangeSelectedValue}/>*/}
+        {/*  </EuiFormRow>*/}
+        {/*</EuiFlexItem>*/}
       </div>
     );
   }
 
   function customEditor() {
     return (
-      <EuiFormRow label="Elasticsearch Query DSL">
+      <EuiFormRow label="Custom Query DSL">
         <EuiCodeEditor value={queryDsl} onChange={(string) => setQueryDsl(string)} mode="json" width="100%" height="250px" />
       </EuiFormRow>
     );
