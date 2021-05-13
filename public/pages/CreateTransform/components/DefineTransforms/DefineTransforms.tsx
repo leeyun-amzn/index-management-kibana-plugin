@@ -21,6 +21,7 @@ import { FieldItem, GROUP_TYPES, TransformGroupItem } from "../../../../../model
 import { TransformService } from "../../../../services";
 import { getErrorMessage } from "../../../../utils/helpers";
 import { isNumericMapping } from "../../utils/helpers";
+import PreviewTransform from "../PreviewTransform";
 
 interface DefineTransformsProps {
   transformService: TransformService;
@@ -28,9 +29,11 @@ interface DefineTransformsProps {
   transformId: string;
   sourceIndex: string;
   fields: FieldItem[];
+  selectedGroupField: TransformGroupItem[];
   onGroupSelectionChange: (selectedFields: TransformGroupItem[]) => void;
   selectedAggregations: any;
   onAggregationSelectionChange: (selectedFields: any) => void;
+  previewTransform: any[];
 }
 
 export default function DefineTransforms({
@@ -39,15 +42,18 @@ export default function DefineTransforms({
   transfromId,
   sourceIndex,
   fields,
+  selectedGroupField,
   onGroupSelectionChange,
   selectedAggregations,
   onAggregationSelectionChange,
+  previewTransform,
 }: DefineTransformsProps) {
   let columns: EuiDataGridColumn[] = [];
 
   fields.map((field: FieldItem) => {
     const isNumeric = isNumericMapping(field.type);
     const isDate = field.type == "date";
+
     // TODO: Handle the available options according to column types
     columns.push({
       id: field.label,
@@ -63,10 +69,11 @@ export default function DefineTransforms({
           {
             label: "Group by histogram ",
             onClick: () => {
+              const targetFieldName = `${field.label}_${GROUP_TYPES.histogram}`;
               groupSelection.push({
                 histogram: {
                   source_field: field.label,
-                  target_field: `${field.label}_${GROUP_TYPES.histogram}`,
+                  target_field: targetFieldName,
                   interval: 5,
                 },
               });
@@ -152,7 +159,7 @@ export default function DefineTransforms({
             label: "Aggregate by count ",
             onClick: () => {
               aggSelection[`count_${field.label}`] = {
-                count: { field: field.label },
+                value_count: { field: field.label },
               };
               onAggregationSelectionChange(aggSelection);
             },
@@ -192,7 +199,6 @@ export default function DefineTransforms({
   });
 
   const [loading, setLoading] = useState<boolean>(true);
-
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 10 });
   const [from, setFrom] = useState<number>(0);
   const [size, setSize] = useState<number>(10);
@@ -200,7 +206,7 @@ export default function DefineTransforms({
   const [visibleColumns, setVisibleColumns] = useState(() => columns.map(({ id }) => id).slice(0, 5));
   const [data, setData] = useState([]);
   const [dataCount, setDataCount] = useState<number>(0);
-  const [groupSelection, setGroupSelection] = useState<TransformGroupItem[]>([]);
+  const [groupSelection, setGroupSelection] = useState<TransformGroupItem[]>(selectedGroupField);
   const [aggSelection, setAggSelection] = useState(selectedAggregations);
 
   const fetchData = useCallback(async () => {
@@ -220,7 +226,7 @@ export default function DefineTransforms({
 
   React.useEffect(() => {
     fetchData();
-  }, [fetchData]);
+  }, []);
 
   const onChangeItemsPerPage = useCallback(
     (pageSize) => {
@@ -300,7 +306,7 @@ export default function DefineTransforms({
         aria-label="Define transforms"
         columns={columns}
         columnVisibility={{ visibleColumns, setVisibleColumns }}
-        rowCount={dataCount}
+        rowCount={Math.min(dataCount, 200)}
         renderCellValue={renderCellValue}
         sorting={{ columns: sortingColumns, onSort }}
         pagination={{
@@ -318,15 +324,10 @@ export default function DefineTransforms({
       />
       <EuiSpacer />
       <EuiText>
-        <h4>Group selection</h4>
+        <h4>Transformed fields preview based on sample data</h4>
       </EuiText>
-      {/*Debug use*/}
-      {JSON.stringify(groupSelection)}
-      <EuiSpacer />
-      <EuiText>
-        <h4>Aggregation</h4>
-      </EuiText>
-      {JSON.stringify(aggSelection)}
+      <EuiSpacer size="s" />
+      <PreviewTransform previewTransform={previewTransform} />
     </ContentPanel>
   );
 }

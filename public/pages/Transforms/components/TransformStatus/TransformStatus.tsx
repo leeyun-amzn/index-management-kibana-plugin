@@ -51,6 +51,14 @@ export default class TransformStatus extends Component<TransformStatusProps> {
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiText size="xs">
+                <dt>Document processed</dt>
+                <dd>
+                  {metadata == null || metadata.transform_metadata == null ? "-" : metadata.transform_metadata.stats.documents_processed}
+                </dd>
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiText size="xs">
                 <dt>Indexed time (ms)</dt>
                 <dd>
                   {metadata == null || metadata.transform_metadata == null ? "-" : metadata.transform_metadata.stats.index_time_in_millis}
@@ -61,10 +69,8 @@ export default class TransformStatus extends Component<TransformStatusProps> {
             <EuiFlexItem></EuiFlexItem>
             <EuiFlexItem>
               <EuiText size="xs">
-                <dt>Document processed</dt>
-                <dd>
-                  {metadata == null || metadata.transform_metadata == null ? "-" : metadata.transform_metadata.stats.documents_processed}
-                </dd>
+                <dt>Page processed</dt>
+                <dd>{metadata == null || metadata.transform_metadata == null ? "-" : metadata.transform_metadata.stats.pages_processed}</dd>
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem>
@@ -73,14 +79,6 @@ export default class TransformStatus extends Component<TransformStatusProps> {
                 <dd>
                   {metadata == null || metadata.transform_metadata == null ? "-" : metadata.transform_metadata.stats.search_time_in_millis}
                 </dd>
-              </EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem></EuiFlexItem>
-            <EuiFlexItem></EuiFlexItem>
-            <EuiFlexItem>
-              <EuiText size="xs">
-                <dt>Page processed</dt>
-                <dd>{metadata == null || metadata.transform_metadata == null ? "-" : metadata.transform_metadata.stats.pages_processed}</dd>
               </EuiText>
             </EuiFlexItem>
           </EuiFlexGrid>

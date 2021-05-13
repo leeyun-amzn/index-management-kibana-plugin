@@ -20,7 +20,7 @@ import moment from "moment";
 import { RollupService, TransformService } from "../../../../services";
 import { BREADCRUMBS, ROUTES } from "../../../../utils/constants";
 import IndexService from "../../../../services/IndexService";
-import { ManagedCatIndex } from "../../../../../server/models/interfaces";
+import { ManagedCatIndex, PreviewTransformResponse } from "../../../../../server/models/interfaces";
 import CreateTransform from "../CreateTransform";
 import CreateTransformStep2 from "../CreateTransformStep2";
 import {
@@ -58,6 +58,7 @@ interface CreateTransformFormState {
   loadingIndices: boolean;
   indices: ManagedCatIndex[];
   totalIndices: number;
+  previewTransform: any[];
 
   description: string;
   sourceIndex: { label: string; value?: IndexItem }[];
@@ -105,6 +106,7 @@ export default class CreateTransformForm extends Component<CreateTransformFormPr
       loadingIndices: true,
       indices: [],
       totalIndices: 0,
+      previewTransform: [],
 
       mappings: "",
       allMappings: [],
@@ -162,6 +164,17 @@ export default class CreateTransformForm extends Component<CreateTransformFormPr
       }
     } catch (err) {
       this.context.notifications.toasts.addDanger(getErrorMessage(err, "Could not load fields"));
+    }
+  };
+
+  previewTransform = async (transform: any): Promise<void> => {
+    try {
+      const { transformService } = this.props;
+      const previewResponse = await transformService.previewTransform(transform);
+      if (previewResponse.ok) this.setState({ previewTransform: previewResponse.response.documents });
+      else this.context.notifications.toasts.addDanger(`Could not preview transform: ${previewResponse.error}`);
+    } catch (err) {
+      this.context.notifications.toasts.addDanger(getErrorMessage(err, "Could not load preview transform"));
     }
   };
 
@@ -249,7 +262,7 @@ export default class CreateTransformForm extends Component<CreateTransformFormPr
   onChangeSourceIndexFilter = (sourceIndexFilter: string): void => {
     let newJSON = this.state.transformJSON;
     try {
-      newJSON.dataSelectionQuery = JSON.parse(sourceIndexFilter);
+      newJSON.transform.data_selection_query = JSON.parse(sourceIndexFilter);
     } catch (err) {
       this.context.notifications.toasts.addDanger('Invalid source index filter JSON: "' + sourceIndexFilter + '"');
     }
@@ -269,12 +282,20 @@ export default class CreateTransformForm extends Component<CreateTransformFormPr
     this.setState({ targetIndex: options, transformJSON: newJSON, targetIndexError: targetIndexError });
   };
 
-  onGroupSelectionChange = (selectedFields: GroupItem[]): void => {
-    this.setState({ selectedGroupField: selectedFields });
+  onGroupSelectionChange = async (selectedGroupField: GroupItem[]): Promise<void> => {
+    let newJSON = this.state.transformJSON;
+
+    if (selectedGroupField.length) newJSON.transform.groups = selectedGroupField;
+    this.setState({ selectedGroupField, transformJSON: newJSON });
+    await this.previewTransform(newJSON);
   };
 
-  onAggregationSelectionChange = (selectedFields: any): void => {
-    this.setState({ selectedAggregations: selectedFields });
+  onAggregationSelectionChange = async (selectedAggregations: any): Promise<void> => {
+    let newJSON = this.state.transformJSON;
+
+    newJSON.transform.aggregations = selectedAggregations;
+    this.setState({ selectedAggregations: selectedAggregations, transformJSON: newJSON });
+    await this.previewTransform(newJSON);
   };
 
   onChangeJobEnabledByDefault = (): void => {
@@ -336,6 +357,7 @@ export default class CreateTransformForm extends Component<CreateTransformFormPr
 
   onSubmit = async (): Promise<void> => {
     const { transformId, transformJSON } = this.state;
+    console.log(transformJSON);
     this.setState({ submitError: "", isSubmitting: true, hasSubmitted: true });
     try {
       if (!transformId) {
@@ -391,6 +413,7 @@ export default class CreateTransformForm extends Component<CreateTransformFormPr
       targetIndex,
       targetIndexError,
       currentStep,
+      previewTransform,
 
       fields,
       selectedTerms,
@@ -439,6 +462,7 @@ export default class CreateTransformForm extends Component<CreateTransformFormPr
           aggregationsError={aggregationsError}
           onGroupSelectionChange={this.onGroupSelectionChange}
           onAggregationSelectionChange={this.onAggregationSelectionChange}
+          previewTransform={previewTransform}
         />
         <CreateTransformStep3
           {...this.props}
@@ -459,6 +483,7 @@ export default class CreateTransformForm extends Component<CreateTransformFormPr
           description={description}
           sourceIndex={sourceIndex}
           targetIndex={targetIndex}
+          sourceIndexFilter={sourceIndexFilter}
           selectedGroupField={selectedGroupField}
           selectedAggregations={selectedAggregations}
           jobEnabledByDefault={jobEnabledByDefault}

@@ -14,10 +14,11 @@
  */
 
 import React, { Component } from "react";
-import { EuiFlexGrid, EuiSpacer, EuiFlexItem, EuiText } from "@elastic/eui";
+import { EuiFlexGrid, EuiSpacer, EuiFlexItem, EuiText, EuiAccordion } from "@elastic/eui";
 import { ContentPanel, ContentPanelActions } from "../../../../components/ContentPanel";
 import { ModalConsumer } from "../../../../components/Modal";
 import { TransformGroupItem } from "../../../../../models/interfaces";
+import DefineTransforms from "../DefineTransforms";
 
 interface ReviewDefinitionProps {
   selectedGroupField: TransformGroupItem[];
@@ -87,6 +88,8 @@ export default class ReviewDefinition extends Component<ReviewDefinitionProps> {
             {groupItems()}
             {aggItems()}
           </EuiFlexGrid>
+          <EuiSpacer />
+          <EuiAccordion id="" buttonContent="Sample source index and transform result"></EuiAccordion>
         </div>
       </ContentPanel>
     );
