@@ -70,14 +70,6 @@ export default function IndexFilterPopover({
     setSelectedOperator(e.target.value);
   };
 
-  const onChangeSelectedValue = (e: ChangeEvent<HTMLInputElement>): void => {
-    setSelectedValue(e.target.value);
-  };
-
-  const onChangeSelectedBooleanValue = (e: ChangeEvent<HTMLSelectElement>): void => {
-    setSelectedBooleanValue(e.target.value);
-  };
-
   const renderBetweenAnd = () => {
     return (
       <EuiFlexGroup alignItems="center">
@@ -101,6 +93,7 @@ export default function IndexFilterPopover({
             // }}
             // inputProps={{ onChange: this.handleChangeWrapper, isInvalid }}
             value={fieldRangeEnd}
+            onChange={(e) => setFieldRangeEnd(e.target.valueAsNumber)}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -115,7 +108,7 @@ export default function IndexFilterPopover({
         <EuiFieldNumber
           name="where.fieldValue"
           value={selectedValue}
-          onChange={onChangeSelectedValue}
+          onChange={(e) => setSelectedValue(e.target.valueAsNumber)}
           // fieldProps={{ validate: required }}
           // inputProps={{ onChange: this.handleChangeWrapper, isInvalid }}
         />
@@ -125,7 +118,7 @@ export default function IndexFilterPopover({
         <EuiSelect
           name="where.fieldValue"
           value={selectedBooleanValue}
-          onChange={onChangeSelectedBooleanValue}
+          onChange={(e) => setSelectedBooleanValue(e.target.value)}
           // fieldProps={{ validate: required }}
           options={WHERE_BOOLEAN_FILTERS}
         />
@@ -134,6 +127,8 @@ export default function IndexFilterPopover({
       return (
         <EuiFieldText
           name="where.fieldValue"
+          value={selectedValue}
+          onChange={(e) => setSelectedValue(e.target.value)}
           // fieldProps={{ validate: required }}
           // inputProps={{ onChange: this.handleChangeWrapper, isInvalid }}
         />
