@@ -53,10 +53,11 @@ export default function DefineTransforms({
   let columns: EuiDataGridColumn[] = [];
 
   fields.map((field: FieldItem) => {
+    const isText = field.type == "text";
     // TODO: Handle the available options according to column types
     columns.push({
       id: field.label,
-      display: (
+      display: !isText && (
         <TransformOptions
           name={field.label}
           type={field.type}
