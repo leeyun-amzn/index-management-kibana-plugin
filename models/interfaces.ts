@@ -275,3 +275,13 @@ export const DATA_TYPES = {
   BOOLEAN: "boolean",
   KEYWORD: "keyword",
 };
+
+export interface FilterItem {
+  name: string;
+  field: string;
+  operator: string;
+  value?: any;
+  booleanValue?: boolean;
+  fieldRangeStart?: number;
+  fieldRangeEnd?: number;
+}

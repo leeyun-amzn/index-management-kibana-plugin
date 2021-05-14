@@ -29,7 +29,7 @@ import {
   EuiText,
   EuiFieldNumber,
 } from "@elastic/eui";
-import { DATA_TYPES, FieldItem, IndexItem } from "../../../../../models/interfaces";
+import { DATA_TYPES, FieldItem, FilterItem, IndexItem } from "../../../../../models/interfaces";
 import { getOperators, isNullOperator, isNumericMapping, isRangeOperator, validateRange } from "../../utils/helpers";
 import { WHERE_BOOLEAN_FILTERS } from "../../utils/constants";
 
@@ -39,6 +39,7 @@ interface IndexFilterPopoverProps {
   sourceIndexFilter: string;
   onChangeSourceIndexFilter: (sourceIndexFilter: string) => void;
   closePopover: () => void;
+  onAddDataFilter: (dataFilter: FilterItem) => void;
 }
 
 export default function IndexFilterPopover({
@@ -47,12 +48,13 @@ export default function IndexFilterPopover({
   sourceIndexFilter,
   onChangeSourceIndexFilter,
   closePopover,
+  onAddDataFilter,
 }: IndexFilterPopoverProps) {
-  const [selectedField, setSelectedField] = useState("");
+  const [selectedField, setSelectedField] = useState(fields[0] ? fields[0].label : "");
   const [selectedFieldType, setSelectedFieldType] = useState("number");
-  const [selectedOperator, setSelectedOperator] = useState("");
+  const [selectedOperator, setSelectedOperator] = useState("is");
   const [selectedValue, setSelectedValue] = useState("");
-  const [selectedBooleanValue, setSelectedBooleanValue] = useState("true");
+  const [selectedBooleanValue, setSelectedBooleanValue] = useState(true);
   const [isCustomEditorOpen, setIsCustomEditorOpen] = useState(false);
   const [queryDsl, setQueryDsl] = useState(sourceIndexFilter);
   const [fieldRangeStart, setFieldRangeStart] = useState();
@@ -68,6 +70,31 @@ export default function IndexFilterPopover({
 
   const onChangeSelectedOperator = (e: ChangeEvent<HTMLSelectElement>): void => {
     setSelectedOperator(e.target.value);
+  };
+
+  const parseFilterItem = (): FilterItem => {
+    if (isRangeOperator(selectedOperator))
+      return {
+        name: selectedField + " " + selectedOperator + ": " + fieldRangeStart + " to " + fieldRangeEnd,
+        field: selectedField,
+        operator: selectedOperator,
+        fieldRangeStart,
+        fieldRangeEnd,
+      };
+    else if (isNullOperator(selectedOperator))
+      return {
+        name: selectedField + " " + selectedOperator + ": " + selectedBooleanValue,
+        field: selectedField,
+        operator: selectedOperator,
+        booleanValue: selectedBooleanValue,
+      };
+    else
+      return {
+        name: selectedField + " " + selectedOperator + ": " + selectedValue,
+        field: selectedField,
+        operator: selectedOperator,
+        value: selectedValue,
+      };
   };
 
   const renderBetweenAnd = () => {
@@ -159,7 +186,6 @@ export default function IndexFilterPopover({
             <EuiFormRow label="Operator">
               <EuiSelect
                 id="selectOperator"
-                // options={[]}
                 options={getOperators(selectedFieldType)}
                 value={selectedOperator}
                 onChange={onChangeSelectedOperator}
@@ -212,8 +238,13 @@ export default function IndexFilterPopover({
             <EuiButton
               fill
               onClick={() => {
-                onChangeSourceIndexFilter(queryDsl);
-                closePopover();
+                // Parse data filter query here
+                if (!isCustomEditorOpen) {
+                  onAddDataFilter(parseFilterItem());
+                } else {
+                  onChangeSourceIndexFilter(queryDsl);
+                  closePopover();
+                }
               }}
               // isDisabled={!this.isFilterValid()}
               data-test-subj="saveFilter"
