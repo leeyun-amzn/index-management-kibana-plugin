@@ -28,7 +28,12 @@ export default function PreviewTransform({ previewTransform }: PreviewTransformP
 
   const renderPreviewCellValue = ({ rowIndex, columnId }) => {
     if (previewTransform.hasOwnProperty(rowIndex)) {
-      return previewTransform[rowIndex][columnId] ? previewTransform[rowIndex][columnId] : "-";
+      if (previewTransform[rowIndex][columnId]) {
+        // Case for percentile
+        return typeof previewTransform[rowIndex][columnId] !== ("string" || "number")
+          ? JSON.stringify(previewTransform[rowIndex][columnId])
+          : previewTransform[rowIndex][columnId];
+      }
     }
     return "-";
   };
