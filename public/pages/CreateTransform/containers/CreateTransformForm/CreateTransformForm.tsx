@@ -23,16 +23,7 @@ import IndexService from "../../../../services/IndexService";
 import { ManagedCatIndex, PreviewTransformResponse } from "../../../../../server/models/interfaces";
 import CreateTransform from "../CreateTransform";
 import CreateTransformStep2 from "../CreateTransformStep2";
-import {
-  DimensionItem,
-  FieldItem,
-  GroupItem,
-  IndexItem,
-  MetricItem,
-  Transform,
-  TransformAggItem,
-  TransformGroupItem,
-} from "../../../../../models/interfaces";
+import { FieldItem, TransformGroupItem, IndexItem, Transform } from "../../../../../models/interfaces";
 import { getErrorMessage } from "../../../../utils/helpers";
 import { EMPTY_TRANSFORM } from "../../utils/constants";
 import CreateTransformStep3 from "../CreateTransformStep3";
@@ -167,14 +158,19 @@ export default class CreateTransformForm extends Component<CreateTransformFormPr
     }
   };
 
-  previewTransform = async (transform: any): Promise<void> => {
+  previewTransform = async (transform: any): Promise<boolean> => {
     try {
       const { transformService } = this.props;
       const previewResponse = await transformService.previewTransform(transform);
-      if (previewResponse.ok) this.setState({ previewTransform: previewResponse.response.documents });
-      else this.context.notifications.toasts.addDanger(`Could not preview transform: ${previewResponse.error}`);
+      if (previewResponse.ok) {
+        this.setState({ previewTransform: previewResponse.response.documents });
+      } else {
+        this.context.notifications.toasts.addDanger(`Could not preview transform: ${previewResponse.error}`);
+      }
+      return previewResponse.ok;
     } catch (err) {
       this.context.notifications.toasts.addDanger(getErrorMessage(err, "Could not load preview transform"));
+      return false;
     }
   };
 
@@ -282,20 +278,24 @@ export default class CreateTransformForm extends Component<CreateTransformFormPr
     this.setState({ targetIndex: options, transformJSON: newJSON, targetIndexError: targetIndexError });
   };
 
-  onGroupSelectionChange = async (selectedGroupField: GroupItem[]): Promise<void> => {
+  onGroupSelectionChange = async (name: string, selectedGroupField: TransformGroupItem[]): Promise<void> => {
     let newJSON = this.state.transformJSON;
 
     if (selectedGroupField.length) newJSON.transform.groups = selectedGroupField;
-    this.setState({ selectedGroupField, transformJSON: newJSON });
-    await this.previewTransform(newJSON);
+
+    const previewSuccess = await this.previewTransform(newJSON);
+    if (previewSuccess) this.setState({ selectedGroupField, transformJSON: newJSON });
+    else this.context.notifications.addDanger("Unable to add grouping due to failure of preview: " + name);
   };
 
-  onAggregationSelectionChange = async (selectedAggregations: any): Promise<void> => {
+  onAggregationSelectionChange = async (name: string, selectedAggregations: any): Promise<void> => {
     let newJSON = this.state.transformJSON;
 
     newJSON.transform.aggregations = selectedAggregations;
-    this.setState({ selectedAggregations: selectedAggregations, transformJSON: newJSON });
-    await this.previewTransform(newJSON);
+
+    const previewSuccess = await this.previewTransform(newJSON);
+    if (previewSuccess) this.setState({ selectedAggregations: selectedAggregations, transformJSON: newJSON });
+    else this.context.notifications.addDanger("Unable to add aggregation due to failure of preview: " + name);
   };
 
   onChangeJobEnabledByDefault = (): void => {

@@ -19,7 +19,7 @@ import { EuiButton, EuiComboBox, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiPanel
 interface PercentilePanelProps {
   name: string;
   aggSelection: any;
-  handleAggSelectionChange: () => void;
+  handleAggSelectionChange: (name: string) => void;
   closePopover: () => void;
 }
 
@@ -95,13 +95,14 @@ export default function PercentilePanel({ name, aggSelection, handleAggSelection
             fill
             fullWidth={false}
             onClick={() => {
-              aggSelection[`percentiles_${name}`] = {
+              const targetField = `percentiles_${name}`;
+              aggSelection[targetField] = {
                 percentiles: {
                   field: name,
                   percents: percents.map((value) => parseFloat(value.label)),
                 },
               };
-              handleAggSelectionChange();
+              handleAggSelectionChange(targetField);
             }}
           >
             OK

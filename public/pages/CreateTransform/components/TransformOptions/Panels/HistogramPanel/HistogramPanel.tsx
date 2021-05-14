@@ -18,7 +18,7 @@ import React, { useState } from "react";
 import { EuiButton, EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiPanel } from "@elastic/eui";
 interface HistogramPanelProps {
   name: string;
-  handleGroupSelectionChange: (newGroupItem: TransformGroupItem) => void;
+  handleGroupSelectionChange: (name: string, newGroupItem: TransformGroupItem) => void;
   closePopover: () => void;
 }
 
@@ -46,11 +46,11 @@ export default function HistogramPanel({ name, handleGroupSelectionChange, close
             fill
             fullWidth={false}
             onClick={() => {
-              const targetFieldName = `${name} _${GROUP_TYPES.histogram}`;
-              handleGroupSelectionChange({
+              const targetField = `${name} _${GROUP_TYPES.histogram}`;
+              handleGroupSelectionChange(targetField, {
                 histogram: {
                   source_field: name,
-                  target_field: targetFieldName,
+                  target_field: targetField,
                   interval: histogramInterval,
                 },
               });

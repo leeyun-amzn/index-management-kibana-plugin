@@ -19,9 +19,11 @@ import PreviewEmptyPrompt from "../PreviewEmptyPrompt";
 
 interface PreviewTransformProps {
   previewTransform: any[];
+  groupAggList: string[];
+  isReadOnly: boolean;
 }
 
-export default function PreviewTransform({ previewTransform }: PreviewTransformProps) {
+export default function PreviewTransform({ previewTransform, groupAggList, isReadOnly }: PreviewTransformProps) {
   const [previewColumns, setPreviewColumns] = useState<EuiDataGridColumn[]>([]);
   const [visiblePreviewColumns, setVisiblePreviewColumns] = useState(() => previewColumns.map(({ id }) => id).slice(0, 5));
   const [previewPagination, setPreviewPagination] = useState({ pageIndex: 0, pageSize: 10 });
@@ -51,11 +53,14 @@ export default function PreviewTransform({ previewTransform }: PreviewTransformP
   );
 
   const updatePreviewColumns = (): void => {
-    if (previewTransform.length) {
-      let tempCol: EuiDataGridColumn[] = [];
-      for (const [key, value] of Object.entries(previewTransform[0])) {
+    //Attempt to show columns by the groups selected and aggregations selected instead of using preview column result.
+    let tempCol: EuiDataGridColumn[] = [];
+    if (!isReadOnly) {
+      //Debug use
+      console.log("Updating preview columns using groupAggList");
+      groupAggList.map((item) => {
         tempCol.push({
-          id: key,
+          id: item,
           actions: {
             showHide: false,
             showMoveLeft: false,
@@ -64,9 +69,29 @@ export default function PreviewTransform({ previewTransform }: PreviewTransformP
             showSortDesc: false,
           },
         });
-      }
+      });
       setPreviewColumns(tempCol);
       setVisiblePreviewColumns(() => tempCol.map(({ id }) => id).slice(0, 5));
+    } else {
+      //Using preview result
+      if (previewTransform.length) {
+        //Debug use
+        console.log("Updating preview columns using previewTransform");
+        for (const [key, value] of Object.entries(previewTransform[0])) {
+          tempCol.push({
+            id: key,
+            actions: {
+              showHide: false,
+              showMoveLeft: false,
+              showMoveRight: false,
+              showSortAsc: false,
+              showSortDesc: false,
+            },
+          });
+        }
+        setPreviewColumns(tempCol);
+        setVisiblePreviewColumns(() => tempCol.map(({ id }) => id).slice(0, 5));
+      }
     }
   };
 

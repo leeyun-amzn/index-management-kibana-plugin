@@ -25,9 +25,10 @@ interface TransformOptionsProps {
   name: string;
   type?: string;
   selectedGroupField: TransformGroupItem[];
-  onGroupSelectionChange: (selectedFields: TransformGroupItem[]) => void;
+  onGroupSelectionChange: (name: string, selectedFields: TransformGroupItem[]) => void;
   selectedAggregations: any;
-  onAggregationSelectionChange: (selectedFields: any) => void;
+  onAggregationSelectionChange: (name: string, selectedFields: any) => void;
+  groupAggList: string[];
 }
 
 export default function TransformOptions({
@@ -37,6 +38,7 @@ export default function TransformOptions({
   onGroupSelectionChange,
   selectedAggregations,
   onAggregationSelectionChange,
+  groupAggList,
 }: TransformOptionsProps) {
   const isNumeric = isNumericMapping(type);
   const isDate = type == "date";
@@ -49,14 +51,23 @@ export default function TransformOptions({
     setIsPopoverOpen(false);
   };
 
-  const handleGroupSelectionChange = (newAggItem: any): void => {
-    groupSelection.push(newAggItem);
-    onGroupSelectionChange(groupSelection);
+  const handleGroupSelectionChange = (name: string, newGroupItem: TransformGroupItem): void => {
+    groupAggList.push(name);
+    groupSelection.push(newGroupItem);
+    onGroupSelectionChange(name, groupSelection);
+    setGroupSelection(selectedGroupField);
     closePopover();
+
+    //Debug use
+    console.log("groupagglist: " + groupAggList);
   };
-  const handleAggSelectionChange = (): void => {
-    onAggregationSelectionChange(aggSelection);
+  const handleAggSelectionChange = (name: string): void => {
+    groupAggList.push(name);
+    onAggregationSelectionChange(name, aggSelection);
+    setAggSelection(selectedAggregations);
     closePopover();
+    //Debug use
+    console.log("groupagglist: " + groupAggList);
   };
 
   const panels: EuiContextMenuPanelDescriptor[] = [
@@ -75,10 +86,11 @@ export default function TransformOptions({
         {
           name: "Group by terms",
           onClick: () => {
-            handleGroupSelectionChange({
+            const targetField = `${name}_${GROUP_TYPES.terms}`;
+            handleGroupSelectionChange(targetField, {
               terms: {
                 source_field: name,
-                target_field: `${name}_${GROUP_TYPES.terms}`,
+                target_field: targetField,
               },
             });
           },
@@ -86,46 +98,51 @@ export default function TransformOptions({
         {
           name: "Aggregate by sum",
           onClick: () => {
-            aggSelection[`sum_${name}`] = {
+            const targetField = `sum_${name}`;
+            aggSelection[targetField] = {
               sum: { field: name },
             };
-            handleAggSelectionChange();
+            handleAggSelectionChange(targetField);
           },
         },
         {
           name: "Aggregate by max",
           onClick: () => {
-            aggSelection[`max_${name}`] = {
+            const targetField = `max_${name}`;
+            aggSelection[targetField] = {
               max: { field: name },
             };
-            handleAggSelectionChange();
+            handleAggSelectionChange(targetField);
           },
         },
         {
           name: "Aggregate by min",
           onClick: () => {
-            aggSelection[`min_${name}`] = {
+            const targetField = `min_${name}`;
+            aggSelection[targetField] = {
               min: { field: name },
             };
-            handleAggSelectionChange();
+            handleAggSelectionChange(targetField);
           },
         },
         {
           name: "Aggregate by avg",
           onClick: () => {
-            aggSelection[`avg_${name}`] = {
+            const targetField = `avg_${name}`;
+            aggSelection[targetField] = {
               avg: { field: name },
             };
-            handleAggSelectionChange();
+            handleAggSelectionChange(targetField);
           },
         },
         {
           name: "Aggregate by count",
           onClick: () => {
-            aggSelection[`count_${name}`] = {
+            const targetField = `count_${name}`;
+            aggSelection[targetField] = {
               value_count: { field: name },
             };
-            handleAggSelectionChange();
+            handleAggSelectionChange(targetField);
           },
         },
         {
@@ -150,10 +167,11 @@ export default function TransformOptions({
         {
           name: "Millisecond",
           onClick: () => {
-            groupSelection.push({
+            const targetField = `${name}_${GROUP_TYPES.dateHistogram}_millisecond`;
+            handleGroupSelectionChange({
               date_histogram: {
                 source_field: name,
-                target_field: `${name}_${GROUP_TYPES.dateHistogram}_millisecond`,
+                target_field: targetField,
                 fixed_interval: "1ms",
               },
             });
@@ -162,10 +180,11 @@ export default function TransformOptions({
         {
           name: "Second",
           onClick: () => {
-            handleGroupSelectionChange({
+            const targetField = `${name}_${GROUP_TYPES.dateHistogram}_second`;
+            handleGroupSelectionChange(targetField, {
               date_histogram: {
                 source_field: name,
-                target_field: `${name}_${GROUP_TYPES.dateHistogram}_second`,
+                target_field: targetField,
                 fixed_interval: "1s",
               },
             });
@@ -174,10 +193,11 @@ export default function TransformOptions({
         {
           name: "Minute",
           onClick: () => {
-            handleGroupSelectionChange({
+            const targetField = `${name}_${GROUP_TYPES.dateHistogram}_minute`;
+            handleGroupSelectionChange(targetField, {
               date_histogram: {
                 source_field: name,
-                target_field: `${name}_${GROUP_TYPES.dateHistogram}_minute`,
+                target_field: targetField,
                 fixed_interval: "1m",
               },
             });
@@ -186,10 +206,11 @@ export default function TransformOptions({
         {
           name: "Hour",
           onClick: () => {
-            handleGroupSelectionChange({
+            const targetField = `${name}_${GROUP_TYPES.dateHistogram}_hour`;
+            handleGroupSelectionChange(targetField, {
               date_histogram: {
                 source_field: name,
-                target_field: `${name}_${GROUP_TYPES.dateHistogram}_hour`,
+                target_field: targetField,
                 fixed_interval: "1h",
               },
             });
@@ -198,10 +219,11 @@ export default function TransformOptions({
         {
           name: "Day",
           onClick: () => {
-            handleGroupSelectionChange({
+            const targetField = `${name}_${GROUP_TYPES.dateHistogram}_day`;
+            handleGroupSelectionChange(targetField, {
               date_histogram: {
                 source_field: name,
-                target_field: `${name}_${GROUP_TYPES.dateHistogram}_day`,
+                target_field: targetField,
                 calendar_interval: "1d",
               },
             });
@@ -210,10 +232,11 @@ export default function TransformOptions({
         {
           name: "Week",
           onClick: () => {
-            handleGroupSelectionChange({
+            const targetField = `${name}_${GROUP_TYPES.dateHistogram}_week`;
+            handleGroupSelectionChange(targetField, {
               date_histogram: {
                 source_field: name,
-                target_field: `${name}_${GROUP_TYPES.dateHistogram}_week`,
+                target_field: targetField,
                 calendar_interval: "1w",
               },
             });
@@ -222,10 +245,11 @@ export default function TransformOptions({
         {
           name: "Month",
           onClick: () => {
-            handleGroupSelectionChange({
+            const targetField = `${name}_${GROUP_TYPES.dateHistogram}_month`;
+            handleGroupSelectionChange(targetField, {
               date_histogram: {
                 source_field: name,
-                target_field: `${name}_${GROUP_TYPES.dateHistogram}_month`,
+                target_field: targetField,
                 calendar_interval: "1M",
               },
             });
@@ -234,10 +258,11 @@ export default function TransformOptions({
         {
           name: "Quarter",
           onClick: () => {
-            handleGroupSelectionChange({
+            const targetField = `${name}_${GROUP_TYPES.dateHistogram}_quarter`;
+            handleGroupSelectionChange(targetField, {
               date_histogram: {
                 source_field: name,
-                target_field: `${name}_${GROUP_TYPES.dateHistogram}_quarter`,
+                target_field: targetField,
                 calendar_interval: "1q",
               },
             });
@@ -246,10 +271,11 @@ export default function TransformOptions({
         {
           name: "Year",
           onClick: () => {
-            handleGroupSelectionChange({
+            const targetField = `${name}_${GROUP_TYPES.dateHistogram}_year`;
+            handleGroupSelectionChange(targetField, {
               date_histogram: {
                 source_field: name,
-                target_field: `${name}_${GROUP_TYPES.dateHistogram}_year`,
+                target_field: targetField,
                 calendar_interval: "1y",
               },
             });

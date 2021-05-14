@@ -30,9 +30,9 @@ interface DefineTransformsProps {
   sourceIndex: string;
   fields: FieldItem[];
   selectedGroupField: TransformGroupItem[];
-  onGroupSelectionChange: (selectedFields: TransformGroupItem[]) => void;
+  onGroupSelectionChange: (name: string, selectedFields: TransformGroupItem[]) => void;
   selectedAggregations: any;
-  onAggregationSelectionChange: (selectedFields: any) => void;
+  onAggregationSelectionChange: (name: string, selectedFields: any) => void;
   previewTransform: any[];
 }
 
@@ -50,6 +50,15 @@ export default function DefineTransforms({
 }: DefineTransformsProps) {
   let columns: EuiDataGridColumn[] = [];
 
+  const [groupAggList, setGroupAggList] = useState<string[]>([]);
+
+  const onChangeGroupAggList = useCallback(
+    (newItem: string[]): void => {
+      setGroupAggList(newItem);
+    },
+    [setGroupAggList]
+  );
+
   fields.map((field: FieldItem) => {
     // TODO: Handle the available options according to column types
     columns.push({
@@ -62,6 +71,7 @@ export default function DefineTransforms({
           onGroupSelectionChange={onGroupSelectionChange}
           selectedAggregations={selectedAggregations}
           onAggregationSelectionChange={onAggregationSelectionChange}
+          groupAggList={groupAggList}
         />
       ),
       displayAsText: field.label + " type: " + field.type,
@@ -333,7 +343,7 @@ export default function DefineTransforms({
         <h4>Transformed fields preview based on sample data</h4>
       </EuiText>
       <EuiSpacer size="s" />
-      <PreviewTransform previewTransform={previewTransform} />
+      <PreviewTransform previewTransform={previewTransform} groupAggList={groupAggList} isReadOnly={false} />
     </ContentPanel>
   );
 }

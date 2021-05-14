@@ -30,9 +30,9 @@ interface CreateTransformStep2Props extends RouteComponentProps {
   sourceIndex: string;
   fields: FieldItem[];
   selectedGroupField: TransformGroupItem[];
-  onGroupSelectionChange: (selectedFields: TransformGroupItem[]) => void;
+  onGroupSelectionChange: (name: string, selectedFields: TransformGroupItem[]) => void;
   selectedAggregations: any;
-  onAggregationSelectionChange: (selectedFields: any) => void;
+  onAggregationSelectionChange: (name: string, selectedFields: any) => void;
   previewTransform: any[];
 }
 
