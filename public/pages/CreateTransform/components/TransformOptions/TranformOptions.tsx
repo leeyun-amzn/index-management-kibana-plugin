@@ -20,6 +20,7 @@ import { isNumericMapping } from "../../utils/helpers";
 import { GROUP_TYPES, TransformGroupItem } from "../../../../../models/interfaces";
 import HistogramPanel from "./Panels/HistogramPanel";
 import PercentilePanel from "./Panels/PercentilePanel";
+import ScriptedMetricsPanel from "./Panels/ScriptedMetricsPanel";
 
 interface TransformOptionsProps {
   name: string;
@@ -144,6 +145,14 @@ export default function TransformOptions({
     {
       id: 3,
       title: "Back",
+      content: (
+        <ScriptedMetricsPanel
+          name={name}
+          aggSelection={aggSelection}
+          handleAggSelectionChange={handleAggSelectionChange}
+          closePopover={closePopover}
+        />
+      ),
     },
   ];
   const datePanels: EuiContextMenuPanelDescriptor[] = [
